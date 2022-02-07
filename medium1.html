@@ -1,0 +1,103 @@
+<html lang="en">    
+
+<title> Convert Excel File To JSON </title>
+
+<head>
+    <style>
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn {
+  border: 2px solid gray;
+  color: gray;
+  background-color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.upload-btn-wrapper input[type=file] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+p {
+text-align: center;
+font-family: Arial;
+font-size: 18px;
+font-style: italic;
+font-weight: bold;
+text-decoration: blink;
+color: #6200ff;
+}
+</style>
+    <script src="js/jquery.js"> </script>
+    <script lang="javascript" src="js/xlsx.full.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+              $("#fileUploader").change(function(evt){
+                  var imgpath = document.getElementById("fileUploader").value;
+                  var arr1 = new Array;
+                arr1 = imgpath.split("\\");
+                var len = arr1.length;
+                var img1 = arr1[len - 1];
+                var filext = img1.substring(img1.lastIndexOf(".") + 1);
+                // Checking Extension
+                if (filext == "xlsx") {
+                    document.getElementById("wait").style.display = "block";
+
+                        document.getElementById("upload").style.display = "none";
+                    var selectedFile = evt.target.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                      var data = event.target.result;
+                      var workbook = XLSX.read(data, {
+                          type: 'binary'
+                      });
+                      workbook.SheetNames.forEach(function(sheetName) {
+                        
+                          var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                          var json_object = JSON.stringify(XL_row_object);
+                          document.getElementById("jsonObject").innerHTML = json_object;
+                          window.open("data:application/txt," + encodeURIComponent(json_object), "_self");
+
+                        })
+                    };
+
+                    reader.onerror = function(event) {
+                        document.getElementById("wait").style.display = "none";
+                        document.getElementById("upload").style.display = "block";
+                      alert("File could not be read")
+                    };
+
+                    reader.readAsBinaryString(selectedFile);
+                  } else {
+                      alert("Select a valid .XLSX file") 
+                  }
+              });
+        });
+    </script>
+
+</head>
+
+<body>
+    <div id="upload" class="upload-btn-wrapper">
+        <button class="btn">Select a .XLSX File</button>
+    <input type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx"/>
+    </div>
+    </br></br>
+    <p hidden id="wait" class="p">Please Wait...</p>
+    <label id="jsonObject"> JSON : </label>
+</body>
+
+
